@@ -3,14 +3,18 @@
 //-sin necesidad de usar el require, como se hacia antes.
 //En el package.json, se debe agregar el type: module, para que node reconozca el archivo como un modulo.
 import express from 'express';
+import indexRoutes from './routes/index.routes.js';
+import usersRoutes from './routes/users.routes.js';
 
 const app = express();
 
-app.get('/', (req, res) => res.send('Hello World!'));
-app.get('/users', (req, res) => res.send('gettin users'));
-app.post('/users', (req, res) => res.send('creating users'));
-app.put('/users', (req, res) => res.send('updating users'));
-app.delete('/users', (req, res) => res.send('deleting users'));
+app.use(express.json());
 
-app.listen(3000);
-console.log('Server on port', 3000);
+app.use(indexRoutes)
+app.use('/api',usersRoutes)
+
+app.use((req, res, next) => {
+    res.status(404).json({ message: 'endpoint not found' })
+})
+
+export default app;
