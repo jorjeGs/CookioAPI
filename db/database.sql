@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (username, name, password, email, salt, profile_pic) 
 VALUES ('Admin', 'Jorge Garcia', 'password', 'test@gmail.com', 'salt', 'https://www.w3schools.com/howto/img_avatar.png');
 
+//alter table users to eliminate salt column
+
+    ALTER TABLE users DROP COLUMN salt;
+
 CREATE TABLE IF NOT EXISTS recipes (
     id INT(11) NOT NULL AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
@@ -48,3 +52,6 @@ CREATE TABLE IF NOT EXISTS comments (
 
 INSERT INTO comments (comment, recipe_id, user_id)
 VALUES ('This is a test comment', 1, 1);
+
+
+

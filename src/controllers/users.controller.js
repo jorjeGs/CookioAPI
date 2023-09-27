@@ -1,5 +1,6 @@
 import { pool } from "../db.js"
 
+//this function has to be deleted on production
 export const getUsers = async (req, res) => {
     //manejo de errores
     try {
@@ -10,6 +11,7 @@ export const getUsers = async (req, res) => {
     }
 }
 
+//this function has to be deleted on production
 export const createUser = async (req, res) => {
     const { username, name, password, email, salt } = req.body
     //validaciones aqui
