@@ -21,6 +21,7 @@ export const getRecipesByUserId = async (req, res) => {
     }
 }
 
+//TODO:
 //solve relationship between recipes and users tables to get liked recipes by user id 
 // fiirst idea is to create a new table called likes with recipe_id and user_id
 // then get recipes by user id where recipe_id = req.params.user_id
@@ -59,6 +60,7 @@ export const updateRecipe = async (req, res) => {
     }
 }
 
+//TODO:
 //create functio to create new recipe from another recipe
 //first get recipe by id, then create new recipe with the same data but with new id
 //that means that in frontend, we show the form recipe with the data of the recipe to copy

@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { encrypt, compare } from '../helpers/handleBcrypt.js';
+import { tokenSign } from '../helpers/handleToken.js';
 
 export const register = async (req, res) => {
     const { username, name, email, password} = req.body
@@ -22,22 +23,25 @@ export const register = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    const { username, password } = req.body
+    const { email, password } = req.body
     try {
-        const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username])
+        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
         if (rows.length === 0) {
             return res.status(400).json({ message: "Invalid credentials" })
         }
         const user = rows[0]
         const validPassword = await compare(password, user.password)
+        
+        //token generate
+        const token = await tokenSign(user)
+        
         if (!validPassword) {
             return res.status(400).json({ message: "Invalid credentials" })
         }
         res.send({
-            id: user.id,
-            username: user.username,
-            name: user.name,
-            email: user.email,
+            data: user,
+            token
+
         })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
