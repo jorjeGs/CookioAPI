@@ -1,13 +1,13 @@
 import { Router } from "express";
 import CheckAuth from "../middleware/auth.js";
-import { getUsers, createUser, updateUser, deleteUser, getUser } from "../controllers/users.controller.js";
+import { getUsers, updateUser, deleteUser, getUser, getLikedRecipes } from "../controllers/users.controller.js";
 
 
 const router = Router();
 
 router.get('/users', CheckAuth ,getUsers);
 router.get('/users/:id', getUser);
-router.post('/users', createUser);
+router.get('/users/:id/liked', getLikedRecipes);
 router.patch('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
 

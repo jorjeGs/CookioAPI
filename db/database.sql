@@ -54,4 +54,16 @@ INSERT INTO comments (comment, recipe_id, user_id)
 VALUES ('This is a test comment', 1, 1);
 
 
+//creating a new table for relationship of liked recipes and users
 
+CREATE TABLE IF NOT EXISTS tr_likes_recipes (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    recipe_id INT(11) NOT NULL,
+    user_id INT(11) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+); 
+
+//already on planetscale from up here
+insert into tr_likes_recipes (user_id,recipe_id) VALUES (1,3);
+insert into tr_likes_recipes (user_id,recipe_id) VALUES (1,1);

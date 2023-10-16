@@ -21,11 +21,6 @@ export const getRecipesByUserId = async (req, res) => {
     }
 }
 
-//TODO:
-//solve relationship between recipes and users tables to get liked recipes by user id 
-// fiirst idea is to create a new table called likes with recipe_id and user_id
-// then get recipes by user id where recipe_id = req.params.user_id
-
 export const getRecipe = async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM recipes WHERE id = ?', [req.params.id])
@@ -93,8 +88,26 @@ export const deleteRecipe = async (req, res) => {
 
 export const likeRecipe = async (req, res) => {
     try {
+        //updateing likes in recipes table
         const [result] = await pool.query('UPDATE recipes SET likes = likes + 1 WHERE id = ?', [req.params.id])
+        //getting updated recipe number of likes
         const [updatedRecipe] = await pool.query('SELECT * FROM recipes WHERE id = ?', [req.params.id])
+        //updating likes in tr_likes_recipes table
+        const [rows] = await pool.query('INSERT INTO tr_likes_recipes (recipe_id, user_id) VALUES (?,?)', [req.params.id, req.params.user_id])
+        res.json({ likes: updatedRecipe[0].likes })
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong",  error: error.message })
+    }
+}
+
+export const unlikeRecipe = async (req, res) => {
+    try {
+        //updateing likes in recipes table
+        const [result] = await pool.query('UPDATE recipes SET likes = likes - 1 WHERE id = ?', [req.params.id])
+        //getting updated recipe number of likes
+        const [updatedRecipe] = await pool.query('SELECT * FROM recipes WHERE id = ?', [req.params.id])
+        //updating likes in tr_likes_recipes table
+        const [rows] = await pool.query('DELETE FROM tr_likes_recipes WHERE recipe_id = ? AND user_id = ?', [req.params.id, req.params.user_id])
         res.json({ likes: updatedRecipe[0].likes })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
