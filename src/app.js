@@ -8,10 +8,12 @@ import usersRoutes from './routes/users.routes.js';
 import recipesRoutes from './routes/recipes.routes.js';
 import commentsRoutes from './routes/comments.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import cors from 'cors';
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 app.use(indexRoutes)
 app.use('/api',usersRoutes)
