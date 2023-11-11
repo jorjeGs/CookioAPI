@@ -25,7 +25,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     const { email, password } = req.body
     try {
-        const [rows] = await pool.query('SELECT username, name, profile_pic, likes, reposts FROM users WHERE email = ?', [email])
+        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
         if (rows.length === 0) {
             return res.status(400).json({ message: "Invalid credentials" })
         }
@@ -39,8 +39,17 @@ export const login = async (req, res) => {
         if (!validPassword) {
             return res.status(400).json({ message: "Invalid credentials" })
         }
+        
         res.send({
-            data: user,
+            data: {
+                id: user.id,
+                username: user.username,
+                name: user.name,
+                email: user.email,
+                profile_pic: user.profile_pic,
+                likes: user.likes,
+                reposts: user.reposts,
+            },
             token
 
         })
