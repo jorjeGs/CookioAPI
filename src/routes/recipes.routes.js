@@ -8,8 +8,8 @@ router.get('/recipes/:id', getRecipe);
 router.get('/recipes/user/:user_id', getRecipesByUserId);
 router.post('/recipes', createRecipe);
 router.patch('/recipes/update/:id', updateRecipe);
-router.patch('/recipes/unlike/:id', unlikeRecipe);
-router.patch('/recipes/like/:id', likeRecipe);
+router.patch('/recipes/unlike/:id/:user_id', unlikeRecipe);
+router.patch('/recipes/like/:id/:user_id', likeRecipe);
 
 router.delete('/recipes/:id', deleteRecipe);
 
