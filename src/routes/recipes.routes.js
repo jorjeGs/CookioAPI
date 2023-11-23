@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, likeRecipe, unlikeRecipe, getRecipesByUserId } from "../controllers/recipes.controller.js";
+import { getRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, likeRecipe, unlikeRecipe, getRecipesByUserId, getLikedRecipes } from "../controllers/recipes.controller.js";
 
 const router = Router();
 
@@ -10,6 +10,7 @@ router.post('/recipes', createRecipe);
 router.patch('/recipes/update/:id', updateRecipe);
 router.patch('/recipes/unlike/:id/:user_id', unlikeRecipe);
 router.patch('/recipes/like/:id/:user_id', likeRecipe);
+router.get('/recipes/liked/:user_id', getLikedRecipes);
 
 router.delete('/recipes/:id', deleteRecipe);
 
