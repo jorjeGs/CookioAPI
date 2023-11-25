@@ -1,5 +1,7 @@
 import e from "express"
 import { pool } from "../db.js"
+//importing handler for resize images
+import { handleResize } from "../helpers/handleResize.js"
 
 export const getRecipes = async (req, res) => {
     //manejo de errores
@@ -32,7 +34,13 @@ export const getRecipe = async (req, res) => {
 
 export const createRecipe = async (req, res) => {
     try {
-        const { title, description, ingredients, steps, image, created_by } = req.body
+        const { title, description, ingredients, steps, created_by } = req.body
+        //saving data from image in variable 
+        const imageFile = req.file
+        //resize image with handleResize function
+        handleResize(imageFile.path, `image-${imageFile.filename}`, 300)
+        //saving image new file name in variable
+        const image = `image-${imageFile.filename}`;
         const [rows] = await pool.query('INSERT INTO recipes (title, description, ingredients, steps, image, created_by) VALUES (?,?,?,?,?,?)', 
         [title, description, ingredients, steps, image, created_by])
         res.json({ id: rows.insertId, title, created_by })
@@ -73,7 +81,7 @@ export const editRecipe = async (req, res) => {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
     }
 }
-
+//TODO: add instruction to delete image from uploads folder
 export const deleteRecipe = async (req, res) => {
     try {
         const [result] = await pool.query('DELETE FROM recipes WHERE id = ?', [req.params.id])
