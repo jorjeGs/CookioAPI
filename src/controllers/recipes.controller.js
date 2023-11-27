@@ -1,5 +1,7 @@
 import e from "express"
 import { pool } from "../db.js"
+//importing handler for resize images
+import { handleResize } from "../helpers/handleResize.js"
 
 export const getRecipes = async (req, res) => {
     //manejo de errores
@@ -32,9 +34,15 @@ export const getRecipe = async (req, res) => {
 
 export const createRecipe = async (req, res) => {
     try {
-        const { title, description, ingredients, steps, image, created_by } = req.body
-        const [rows] = await pool.query('INSERT INTO recipes (title, description, ingredients, steps, image, created_by) VALUES (?,?,?,?,?,?)', 
-        [title, description, ingredients, steps, image, created_by])
+        const { title, description, created_by } = req.body
+        //saving data from image in variable 
+        const imageFile = req.file
+        //resize image with handleResize function
+        handleResize(imageFile.path, `image-${imageFile.filename}`, 300)
+        //saving image new file name in variable
+        const image = `image-${imageFile.filename}`;
+        const [rows] = await pool.query('INSERT INTO recipes (title, description, image, created_by) VALUES (?,?,?,?)', 
+        [title, description, image, created_by])
         res.json({ id: rows.insertId, title, created_by })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
@@ -73,7 +81,7 @@ export const editRecipe = async (req, res) => {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
     }
 }
-
+//TODO: add instruction to delete image from uploads folder
 export const deleteRecipe = async (req, res) => {
     try {
         const [result] = await pool.query('DELETE FROM recipes WHERE id = ?', [req.params.id])
@@ -92,6 +100,8 @@ export const likeRecipe = async (req, res) => {
         const [result] = await pool.query('UPDATE recipes SET likes = likes + 1 WHERE id = ?', [req.params.id])
         //updating likes in tr_likes_recipes table
         const [rows] = await pool.query('INSERT INTO tr_likes_recipes (recipe_id, user_id) VALUES (?,?)', [req.params.id, req.params.user_id])
+        //also, we want to update the number of likes for the user, so
+        await pool.query('UPDATE users SET likes = likes + 1 WHERE id = (SELECT created_by FROM recipes WHERE id = ?)', [req.params.id])
         //gettin id's of liked recipes by user id from tr_likes_recipes table
         const [likedRecipes] = await pool.query('SELECT recipe_id FROM tr_likes_recipes WHERE user_id = ?', [req.params.user_id])
         const valuesOnly = likedRecipes.map(likedRecipes => likedRecipes.recipe_id);
@@ -107,6 +117,8 @@ export const unlikeRecipe = async (req, res) => {
         const [result] = await pool.query('UPDATE recipes SET likes = likes - 1 WHERE id = ?', [req.params.id])
         //updating likes in tr_likes_recipes table
         const [rows] = await pool.query('DELETE FROM tr_likes_recipes WHERE recipe_id = ? AND user_id = ?', [req.params.id, req.params.user_id])
+        //also, we want to update the number of likes for the user, so
+        await pool.query('UPDATE users SET likes = likes - 1 WHERE id = (SELECT created_by FROM recipes WHERE id = ?)', [req.params.id])
         //gettin id's of liked recipes by user id from tr_likes_recipes table
         const [likedRecipes] = await pool.query('SELECT recipe_id FROM tr_likes_recipes WHERE user_id = ?', [req.params.user_id])
         const valuesOnly = likedRecipes.map(likedRecipes => likedRecipes.recipe_id);

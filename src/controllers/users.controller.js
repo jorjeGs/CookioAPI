@@ -1,4 +1,6 @@
 import { pool } from "../db.js"
+//importing handler for resize images
+import { handleResize } from "../helpers/handleResize.js"
 
 //this function has to be deleted on production
 export const getUsers = async (req, res) => {
@@ -7,52 +9,58 @@ export const getUsers = async (req, res) => {
         const [rows] = await pool.query('SELECT * FROM users')
         res.json(rows)
     } catch (error) {
-        res.status(500).json({ message: "Something went wrong",  error: error.message })
+        res.status(500).json({ message: "Something went wrong", error: error.message })
     }
 }
 
 export const updateUser = async (req, res) => {
-    const { username, name, email, profile_pic} = req.body
-    const { id } = req.params
-    //validaciones aqui
-    //IFNULL, si el valor es nulo, se asigna el valor que se le pasa como segundo parametro
-    try{
-    const [rows] = await pool.query('UPDATE users SET username = IFNULL(?, username), name = IFNULL(?, name), email = IFNULL(?, email), profile_pic = IFNULL(?, profile_pic) WHERE id = ?',
-     [username, name, email, profile_pic, id])
-    
-    if (rows.affectedRows <= 0) {
-        return res.status(404).json({ message: 'User not found' })
-    }
+    try {
+        const { username } = req.body
+        const { id } = req.params
+        //saving data from image in variable 
+        const imageFile = req.file
+        //resize image with handleResize function
+        handleResize(imageFile.path, `user-${imageFile.filename}`, 300)
+        //saving image new file name in variable
+        const profile_pic = `user-${imageFile.filename}`;
+        //validaciones aqui
+        //IFNULL, si el valor es nulo, se asigna el valor que se le pasa como segundo parametro
+        const [rows] = await pool.query('UPDATE users SET username = IFNULL(?, username), profile_pic = IFNULL(?, profile_pic) WHERE id = ?',
+            [username, profile_pic, id])
 
-    res.sendStatus(204)
+        if (rows.affectedRows <= 0) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        res.sendStatus(204).json({ message: 'User updated successfully' })
     } catch (error) {
-    res.status(500).json({ message: "Something went wrong",  error: error.message })
+        res.status(500).json({ message: "Something went wrong", error: error.message })
     }
 }
 
 export const deleteUser = async (req, res) => {
     const { id } = req.params
-    try{
-    const [result] = await pool.query('DELETE FROM users WHERE id = ?', [id])
-    if (result.affectedRows <= 0) {
-        return res.status(404).json({ message: 'User not found' })
-    }
-    res.sendStatus(204)
+    try {
+        const [result] = await pool.query('DELETE FROM users WHERE id = ?', [id])
+        if (result.affectedRows <= 0) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        res.sendStatus(204)
     } catch (error) {
-    res.status(500).json({ message: "Something went wrong",  error: error.message })
+        res.status(500).json({ message: "Something went wrong", error: error.message })
     }
 }
 
 export const getUser = async (req, res) => {
     const { id } = req.params
-    try{
-    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id])
-    if (rows.length === 0) {
-        return res.status(404).json({ message: 'User not found' })
-    }
-    res.json(rows[0])
-    } catch (error) {    
-    res.status(500).json({ message: "Something went wrong",  error: error.message })
+    try {
+        const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id])
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        res.json(rows[0])
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong", error: error.message })
     }
 }
 
@@ -64,16 +72,16 @@ export const getUser = async (req, res) => {
 
 export const getLikedRecipes = async (req, res) => {
     const { id } = req.params
-    try{
-    const [rows] = await pool.query(
-        'SELECT recipes.* FROM recipes INNER JOIN tr_likes_recipes ON recipes.id = tr_likes_recipes.recipe_id WHERE tr_likes_recipes.user_id = ?'
-        , [id])
-    if (rows.length === 0) {
-        return res.json({ message: 'Aun no hay likes' })
-    }
-  
-    res.json(rows)
-    } catch (error) {    
-    res.status(500).json({ message: "Something went wrong",  error: error.message })
+    try {
+        const [rows] = await pool.query(
+            'SELECT recipes.* FROM recipes INNER JOIN tr_likes_recipes ON recipes.id = tr_likes_recipes.recipe_id WHERE tr_likes_recipes.user_id = ?'
+            , [id])
+        if (rows.length === 0) {
+            return res.json({ message: 'Aun no hay likes' })
+        }
+
+        res.json(rows)
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong", error: error.message })
     }
 }
