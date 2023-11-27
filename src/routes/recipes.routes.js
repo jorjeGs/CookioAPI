@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, likeRecipe, unlikeRecipe, getRecipesByUserId, getLikedRecipes, uploadImage } from "../controllers/recipes.controller.js";
+import { getRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, likeRecipe, unlikeRecipe, getRecipesByUserId, getLikedRecipes } from "../controllers/recipes.controller.js";
 //using multer to upload images
 import multer from 'multer';
 //importing path to serve static files
