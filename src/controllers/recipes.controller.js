@@ -38,7 +38,7 @@ export const createRecipe = async (req, res) => {
         //saving data from image in variable 
         const imageFile = req.file
         //resize image with handleResize function
-        handleResize(imageFile.path, `image-${imageFile.filename}`, 300)
+        handleResize(imageFile.path, `image-${imageFile.filename}`, 600)
         //saving image new file name in variable
         const image = `image-${imageFile.filename}`;
         const [rows] = await pool.query('INSERT INTO recipes (title, description, image, created_by) VALUES (?,?,?,?)', 
