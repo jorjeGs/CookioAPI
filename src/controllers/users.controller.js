@@ -54,7 +54,7 @@ export const deleteUser = async (req, res) => {
 export const getUser = async (req, res) => {
     const { id } = req.params
     try {
-        const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id])
+        const [rows] = await pool.query('SELECT id, username, name, profile_pic, likes FROM users WHERE id = ?', [id])
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' })
         }
