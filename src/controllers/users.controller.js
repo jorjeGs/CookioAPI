@@ -17,6 +17,16 @@ export const updateUser = async (req, res) => {
     try {
         const { username } = req.body
         const { id } = req.params
+        //check if image is uploaded
+        if (!req.file) {
+            //IFNULL, si el valor es nulo, se asigna el valor que se le pasa como segundo parametro
+            const [rows] = await pool.query('UPDATE users SET username = IFNULL(?, username) WHERE id = ?',
+                [username, id])
+            if (rows.affectedRows <= 0) {
+                return res.json({ message: 'User not found' })
+            }
+            return res.json({ message: 'User updated successfully' })
+        }
         //saving data from image in variable 
         const imageFile = req.file
         //resize image with handleResize function
@@ -29,10 +39,9 @@ export const updateUser = async (req, res) => {
             [username, profile_pic, id])
 
         if (rows.affectedRows <= 0) {
-            return res.status(404).json({ message: 'User not found' })
+            return res.json({ message: 'User not found' })
         }
-
-        res.sendStatus(204).json({ message: 'User updated successfully' })
+        res.json({ message: 'User updated successfully' })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong", error: error.message })
     }
@@ -76,10 +85,6 @@ export const getLikedRecipes = async (req, res) => {
         const [rows] = await pool.query(
             'SELECT recipes.* FROM recipes INNER JOIN tr_likes_recipes ON recipes.id = tr_likes_recipes.recipe_id WHERE tr_likes_recipes.user_id = ?'
             , [id])
-        if (rows.length === 0) {
-            return res.json({ message: 'Aun no hay likes' })
-        }
-
         res.json(rows)
     } catch (error) {
         res.status(500).json({ message: "Something went wrong", error: error.message })
