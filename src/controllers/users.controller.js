@@ -1,6 +1,14 @@
 import { pool } from "../db.js"
 //importing handler for resize images
 import { handleResize } from "../helpers/handleResize.js"
+//importing s3.js to upload images to aws s3
+import { uploadFile } from "../s3.js"
+//importing path to serve static files
+import path from 'path';
+//importing fileUrlToPath to get the path of the image
+import { fileURLToPath } from 'url';
+const __fileName = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__fileName);
 
 //this function has to be deleted on production
 export const getUsers = async (req, res) => {
@@ -46,6 +54,23 @@ export const updateUser = async (req, res) => {
         res.status(500).json({ message: "Something went wrong", error: error.message })
     }
 }
+//test rute to upload images to aws s3
+export const updatingUserImage = async (req, res) => {
+    //get image
+    const imageFile = req.file
+    //resize image with handleResize function and save return value in variable
+    await handleResize(imageFile.path, `user-${imageFile.filename}`, 300)
+    //saving image new file name in variable
+    const profile_pic = `user-${imageFile.filename}`;
+    //console log readStream of image
+    const pathImage = path.join(__dirname, '../../optimized/' ,`${profile_pic}`)
+    //upload image to aws s3
+    const result = await uploadFile(pathImage, profile_pic + '.jpg')
+    res.json({ result })
+}
+//test rute to get images from aws s3
+
+
 
 export const deleteUser = async (req, res) => {
     const { id } = req.params

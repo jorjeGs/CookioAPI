@@ -1,6 +1,6 @@
 import { Router } from "express";
 import CheckAuth from "../middleware/auth.js";
-import { getUsers, updateUser, deleteUser, getUser, getLikedRecipes } from "../controllers/users.controller.js";
+import { getUsers, updateUser, deleteUser, getUser, getLikedRecipes, updatingUserImage } from "../controllers/users.controller.js";
 //using multer to upload images
 import multer from 'multer';
 //importing path to serve static files
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         //get file extension
         const ext = file.originalname.split('.').pop()
-        cb(null, `${Date.now()}.${ext}`)
+        cb(null, `${Date.now()}`)
     }
 })
 //value for config multer
@@ -38,7 +38,7 @@ router.get('/users/images/:file', (req, res) => {
     console.log(import.meta.url)
     res.sendFile(path.join(__dirname, '../../optimized/' ,`${file}`))
 })
-router.patch('/users/:id', upload.single('profile_pic'), updateUser);
+router.patch('/users/:id', upload.single('profile_pic'), updatingUserImage);
 router.delete('/users/:id', deleteUser);
 
 export default router;
