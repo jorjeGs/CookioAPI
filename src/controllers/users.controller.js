@@ -1,6 +1,14 @@
 import { pool } from "../db.js"
 //importing handler for resize images
 import { handleResize } from "../helpers/handleResize.js"
+//importing s3.js to upload images to aws s3
+import { uploadFile } from "../s3.js"
+//importing path to serve static files
+import path from 'path';
+//importing fileUrlToPath to get the path of the image
+import { fileURLToPath } from 'url';
+const __fileName = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__fileName);
 
 //this function has to be deleted on production
 export const getUsers = async (req, res) => {
@@ -29,10 +37,10 @@ export const updateUser = async (req, res) => {
         }
         //saving data from image in variable 
         const imageFile = req.file
-        //resize image with handleResize function
-        handleResize(imageFile.path, `user-${imageFile.filename}`, 300)
         //saving image new file name in variable
-        const profile_pic = `user-${imageFile.filename}`;
+        const profile_pic = `user-${imageFile.filename}.jpeg`;
+        //resize image with handleResize function
+        await handleResize(imageFile.path, profile_pic, 300)
         //validaciones aqui
         //IFNULL, si el valor es nulo, se asigna el valor que se le pasa como segundo parametro
         const [rows] = await pool.query('UPDATE users SET username = IFNULL(?, username), profile_pic = IFNULL(?, profile_pic) WHERE id = ?',
@@ -40,8 +48,13 @@ export const updateUser = async (req, res) => {
 
         if (rows.affectedRows <= 0) {
             return res.json({ message: 'User not found' })
+        } else {
+            //console log readStream of image
+            const pathImage = path.join(__dirname, '../../optimized', `${profile_pic}`)
+            //upload image to aws s3
+            const result = await uploadFile(pathImage, profile_pic)
+            res.json({ message: 'User updated successfully', AWSresult: result })
         }
-        res.json({ message: 'User updated successfully' })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong", error: error.message })
     }

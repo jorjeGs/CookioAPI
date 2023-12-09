@@ -2,6 +2,14 @@ import e from "express"
 import { pool } from "../db.js"
 //importing handler for resize images
 import { handleResize } from "../helpers/handleResize.js"
+//importing s3.js to upload images to aws s3
+import { uploadFile } from "../s3.js"
+//importing path to serve static files
+import path from 'path';
+//importing fileUrlToPath to get the path of the image
+import { fileURLToPath } from 'url';
+const __fileName = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__fileName);
 
 export const getRecipes = async (req, res) => {
     //manejo de errores
@@ -37,13 +45,17 @@ export const createRecipe = async (req, res) => {
         const { title, description, created_by, created_by_id } = req.body
         //saving data from image in variable 
         const imageFile = req.file
-        //resize image with handleResize function
-        handleResize(imageFile.path, `image-${imageFile.filename}`, 600)
         //saving image new file name in variable
-        const image = `image-${imageFile.filename}`;
+        const image = `image-${imageFile.filename}.jpeg`;
+        //resize image with handleResize function
+        await handleResize(imageFile.path, image, 600)
         const [rows] = await pool.query('INSERT INTO recipes (title, description, image, created_by, created_by_id) VALUES (?,?,?,?,?)', 
         [title, description, image, created_by, created_by_id])
-        res.json({ id: rows.insertId, title, created_by })
+        //console log readStream of image
+        const pathImage = path.join(__dirname, '../../optimized' ,`${image}`)
+        //upload image to aws s3
+        const result = await uploadFile(pathImage, image)
+        res.json({ id: rows.insertId, title, created_by, result: result })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
     }
