@@ -14,7 +14,7 @@ const __dirname = path.dirname(__fileName);
 export const getRecipes = async (req, res) => {
     //manejo de errores
     try {
-        const [rows] = await pool.query('SELECT * FROM recipes')
+        const [rows] = await pool.query('SELECT * FROM recipes ORDER BY created_at DESC')
         res.json(rows)
     } catch (error) {
         res.status(500).json({ message: "Something went wrong",  error: error.message })
