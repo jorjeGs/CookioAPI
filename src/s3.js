@@ -21,6 +21,7 @@ export const uploadFile = async (filePath, imageName) => {
         Bucket: AWS_BUCKET_NAME,
         Key: imageName,
         Body: stream,
+        ContentType: 'image/jpeg',
     }
     //putObject is a command that adds an object to a bucket.
     try {

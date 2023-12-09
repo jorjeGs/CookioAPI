@@ -59,11 +59,11 @@ export const updatingUserImage = async (req, res) => {
     //get image
     const imageFile = req.file
     //resize image with handleResize function and save return value in variable
-    await handleResize(imageFile.path, `user-${imageFile.filename}`, 300)
+    const newImage = await handleResize(imageFile.path, `user-${imageFile.filename}`, 300)
     //saving image new file name in variable
     const profile_pic = `user-${imageFile.filename}`;
     //console log readStream of image
-    const pathImage = path.join(__dirname, '../../optimized/' ,`${profile_pic}`)
+    const pathImage = path.join(__dirname, '../../optimized' ,`${profile_pic}`)
     //upload image to aws s3
     const result = await uploadFile(pathImage, profile_pic + '.jpg')
     res.json({ result })
